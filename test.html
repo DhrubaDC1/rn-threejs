@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PostMessage from Iframe</title>
+    <script>
+      function sendMessage() {
+        // Send a message to the parent window
+        window.ReactNativeWebView.postMessage("Received from iframe: ");
+      }
+      window.onload = sendMessage;
+    </script>
+  </head>
+  <body>
+    <h1>This is the iframe content</h1>
+  </body>
+</html>

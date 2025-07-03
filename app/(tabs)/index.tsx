@@ -6,7 +6,7 @@ import { WebView } from "react-native-webview";
 export default function HomeScreen() {
   const webViewRef = useRef<WebView>(null);
 
-  const iframeString = `<iframe id="alisha" src="https://langara-avatar-staging-385c2dc27d8e.herokuapp.com/real.html" width="100%" height="100%" frameborder="0"></iframe>`;
+  const iframeString = `<iframe id="alisha" src="https://1c52-45-248-149-210.ngrok-free.app/test.html" width="100%" height="100%" frameborder="0"></iframe>`;
 
   const sendMessageToIframe = (currentEmotion: string) => {
     const jsCode = `
@@ -24,7 +24,6 @@ export default function HomeScreen() {
       webViewRef.current.injectJavaScript(jsCode);
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.webViewContainer}>
@@ -55,7 +54,6 @@ export default function HomeScreen() {
           }}
           automaticallyAdjustContentInsets={false}
           onMessage={(event) => {
-            // Handle messages from WebView if needed
             console.log("Message from WebView:", event.nativeEvent.data);
           }}
         />
