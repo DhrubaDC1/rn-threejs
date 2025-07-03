@@ -1,75 +1,94 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useRef } from "react";
+import { Button, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { WebView } from "react-native-webview";
 
 export default function HomeScreen() {
+  const webViewRef = useRef<WebView>(null);
+
+  const iframeString = `<iframe id="alisha" src="https://langara-avatar-staging-385c2dc27d8e.herokuapp.com/real.html" width="100%" height="100%" frameborder="0"></iframe>`;
+
+  const sendMessageToIframe = (currentEmotion: string) => {
+    const jsCode = `
+      const alisha = document.getElementById("alisha");
+      if (alisha && alisha.contentWindow) {
+        alisha.contentWindow.postMessage(
+          { call: "sendValue", langaraEmotion: "${currentEmotion}" },
+          "*"
+        );
+      }
+      true; // Return true to indicate successful execution
+    `;
+
+    if (webViewRef.current) {
+      webViewRef.current.injectJavaScript(jsCode);
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.webViewContainer}>
+        <WebView
+          ref={webViewRef}
+          scalesPageToFit={true}
+          bounces={false}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          startInLoadingState={true}
+          source={{
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                  body { margin: 0; padding: 0; overflow: hidden; }
+                  #baseDiv { width: 100%; height: 100vh; }
+                  iframe { width: 100%; height: 100%; border: none; }
+                </style>
+              </head>
+              <body>
+                <div id="baseDiv">${iframeString}</div>
+              </body>
+              </html>
+            `,
+          }}
+          automaticallyAdjustContentInsets={false}
+          onMessage={(event) => {
+            // Handle messages from WebView if needed
+            console.log("Message from WebView:", event.nativeEvent.data);
+          }}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+
+        {/* Example button to trigger the message */}
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Send Happy Emotion"
+            onPress={() => sendMessageToIframe("Happiness")}
+          />
+          <Button
+            title="Send Sad Emotion"
+            onPress={() => sendMessageToIframe("Sadness")}
+          />
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  webViewContainer: {
+    flex: 1,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  buttonContainer: {
+    position: "absolute",
+    bottom: 50,
+    left: 20,
+    right: 20,
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
 });
